@@ -60,10 +60,10 @@ func ValidateJWT(tokenString, tokenSecret string) (string, error) {
 }
 
 func GetBearerToken(headers http.Header) (string, error) {
-	return getValueFromAuthorizationHeader(headers, "Bearer")
+	return getValueFromAuthHeader(headers, "Bearer")
 }
 
-func getValueFromAuthorizationHeader(headers http.Header, key string) (string, error) {
+func getValueFromAuthHeader(headers http.Header, key string) (string, error) {
 	authHeader, ok := headers["Authorization"]
 	if !ok {
 		return "", errors.New("Authorization header not found")
@@ -75,7 +75,7 @@ func getValueFromAuthorizationHeader(headers http.Header, key string) (string, e
 		if len(fields) != 2 {
 			continue
 		}
-        if strings.EqualFold(fields[0], key) {
+		if strings.EqualFold(fields[0], key) {
 			keyValue = fields[1]
 		}
 	}
