@@ -7,6 +7,8 @@ import (
 	"github.com/faeb5/winecellar/internal/auth"
 )
 
+const userIdHeader = "X-User-ID"
+
 func Authorized(jwtSecret string) Middleware {
 	return func(next http.Handler) http.Handler {
 		secret := jwtSecret
@@ -26,7 +28,7 @@ func Authorized(jwtSecret string) Middleware {
 				return
 			}
 
-			r.Header.Set("X-User-ID", userID)
+			r.Header.Set(userIdHeader, userID)
 
 			next.ServeHTTP(w, r)
 		})
