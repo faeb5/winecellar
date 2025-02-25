@@ -9,8 +9,6 @@ CREATE TABLE wines (
     vintage INTEGER NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    created_by TEXT NOT NULL,
-    updated_by TEXT NOT NULL,
     UNIQUE (wine_maker, name, vintage)
 );
 -- +goose StatementEnd
