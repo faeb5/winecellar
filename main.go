@@ -8,27 +8,28 @@ import (
 )
 
 func main() {
-	port := "8080"
-	jwtSecret := "mySecret"
-	platform := "dev"
+	log.Println("Listening on port 8080")
 
-	stack := middleware.CreateStack(
-		middleware.Logging,
-		middleware.DevOnly(platform),
-		middleware.Authorized(jwtSecret),
-	)
-
-	mux := http.NewServeMux()
-
-	mux.HandleFunc("GET /health", func(w http.ResponseWriter, r *http.Request) {
+	apiMux := http.NewServeMux()
+	apiMux.HandleFunc("GET /health", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte(http.StatusText(http.StatusOK)))
 	})
 
-	log.Println("Listening on port", port)
+	apiStack := middleware.CreateStack(middleware.Authorized("my-little-secret"))
+
+	mux := http.NewServeMux()
+	mux.Handle("/api/", http.StripPrefix("/api", apiStack(apiMux)))
+	mux.HandleFunc("POST /login", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("Login successful"))
+	})
+
+	defaultStack := middleware.CreateStack(middleware.Logging)
+
 	server := http.Server{
-		Addr:    ":" + port,
-		Handler: stack(mux),
+		Addr:    ":8080",
+		Handler: defaultStack(mux),
 	}
 	log.Fatal(server.ListenAndServe())
 }
