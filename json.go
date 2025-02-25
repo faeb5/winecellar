@@ -13,10 +13,7 @@ func respondWithError(w http.ResponseWriter, status int, message string, err err
 	if status > 499 {
 		log.Printf("Responding with status 5XX: %s", message)
 	}
-	type errorResponse struct {
-		Error string `json:"error"`
-	}
-	respondWithJSON(w, status, errorResponse{message})
+	w.WriteHeader(status)
 }
 
 func respondWithJSON(w http.ResponseWriter, status int, payload any) {
@@ -24,12 +21,13 @@ func respondWithJSON(w http.ResponseWriter, status int, payload any) {
 	data, err := json.Marshal(payload)
 	if err != nil {
 		log.Printf("Error marshalling JSON: %s", err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-	if _, err := w.Write(data); err != nil {
-		http.Error(w, "Unable to write json", http.StatusInternalServerError)
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
 	w.WriteHeader(status)
+	if _, err := w.Write(data); err != nil {
+		log.Printf("Unable to write response: %s", err)
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
 }

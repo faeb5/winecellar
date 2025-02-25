@@ -25,7 +25,7 @@
     devShells.x86_64-linux.default = with pkgs;
       mkShellNoCC {
         buildInputs = with pkgs; [go];
-        packages = with pkgs; [gopls gotools golangci-lint sqlite sqlc goose];
+        packages = with pkgs; [gopls gotools golangci-lint sqlite sqlc goose httpie];
         shellHook = ''echo "Welcome to the winecellar development environment"'';
         GOOSE_DRIVER = "sqlite3";
         GOOSE_MIGRATION_DIR = "./sql/schema/";
