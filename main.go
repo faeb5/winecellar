@@ -2,26 +2,16 @@ package main
 
 import (
 	"database/sql"
-	"encoding/json"
 	"errors"
 	"log"
 	"net/http"
 	"os"
-	"time"
 
-	"github.com/faeb5/winecellar/internal/auth"
 	"github.com/faeb5/winecellar/internal/database"
 	"github.com/faeb5/winecellar/internal/middleware"
-	"github.com/google/uuid"
 	"github.com/joho/godotenv"
 
 	_ "github.com/mattn/go-sqlite3"
-)
-
-const (
-	accessTokenExpiresIn  = time.Hour
-	refreshTokenExpiresIn = 60 * 24 * time.Hour
-	userIdHeader          = "X-User-ID"
 )
 
 type apiConfig struct {
@@ -106,124 +96,4 @@ func openDatabase(dbURL string) (*database.Queries, error) {
 	}
 
 	return database.New(db), nil
-}
-
-func handleLogin(conf apiConfig) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		type parameters struct {
-			Email    string `json:"email"`
-			Password string `json:"password"`
-		}
-		type response struct {
-			user
-			Token        string `json:"token"`
-			RefreshToken string `json:"refresh_token"`
-		}
-
-		decoder := json.NewDecoder(r.Body)
-		var params parameters
-		if err := decoder.Decode(&params); err != nil {
-			respondWithError(w, http.StatusBadRequest, http.StatusText(http.StatusBadRequest), err)
-			return
-		}
-
-		dbUser, err := conf.dbQueries.GetUserByEmail(r.Context(), params.Email)
-		if err != nil {
-			respondWithError(w, http.StatusUnauthorized, http.StatusText(http.StatusUnauthorized), err)
-			return
-		}
-
-		if err := auth.CheckPasswordHash(params.Password, dbUser.HashedPassword); err != nil {
-			respondWithError(w, http.StatusUnauthorized, http.StatusText(http.StatusUnauthorized), err)
-			return
-		}
-
-		accessToken, err := auth.MakeJWT(dbUser.ID, conf.jwtSecret, accessTokenExpiresIn)
-		if err != nil {
-			respondWithError(w, http.StatusInternalServerError,
-				http.StatusText(http.StatusInternalServerError), err)
-			return
-		}
-
-		refreshToken, err := auth.MakeRefreshToken()
-		if err != nil {
-			respondWithError(w, http.StatusInternalServerError,
-				http.StatusText(http.StatusInternalServerError), err)
-			return
-		}
-
-		if _, err := conf.dbQueries.CreateRefreshToken(r.Context(), database.CreateRefreshTokenParams{
-			Token:     refreshToken,
-			UserID:    dbUser.ID,
-			ExpiresAt: time.Now().Add(refreshTokenExpiresIn),
-		}); err != nil {
-			respondWithError(w, http.StatusInternalServerError,
-				http.StatusText(http.StatusInternalServerError), err)
-			return
-		}
-
-		respondWithJSON(w, http.StatusOK, response{
-			user: user{
-				ID:        dbUser.ID,
-				Email:     dbUser.Email,
-				CreatedAt: dbUser.CreatedAt,
-				UpdatedAt: dbUser.UpdatedAt,
-			},
-			Token:        accessToken,
-			RefreshToken: refreshToken,
-		})
-	}
-}
-
-func handleRegister(conf apiConfig) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		type parameters struct {
-			Email    string `json:"email"`
-			Password string `json:"password"`
-		}
-		type response struct {
-			user
-		}
-
-		decoder := json.NewDecoder(r.Body)
-		var params parameters
-		if err := decoder.Decode(&params); err != nil {
-			respondWithError(w, http.StatusBadRequest, http.StatusText(http.StatusBadRequest), err)
-			return
-		}
-
-		// No error means the user already exists
-		if _, err := conf.dbQueries.GetUserByEmail(r.Context(), params.Email); err == nil {
-			respondWithError(w, http.StatusBadRequest,
-				http.StatusText(http.StatusBadRequest), err)
-			return
-		}
-
-		hashedPassword, err := auth.HashPassword(params.Password)
-		if err != nil {
-			respondWithError(w, http.StatusInternalServerError,
-				http.StatusText(http.StatusInternalServerError), err)
-			return
-		}
-
-		dbUser, err := conf.dbQueries.CreateUser(r.Context(), database.CreateUserParams{
-			ID:             uuid.NewString(),
-			Email:          params.Email,
-			HashedPassword: hashedPassword,
-		})
-		if err != nil {
-			respondWithError(w, http.StatusInternalServerError,
-				http.StatusText(http.StatusInternalServerError), err)
-			return
-		}
-
-		respondWithJSON(w, http.StatusOK, response{
-			user{
-				ID:        dbUser.ID,
-				Email:     dbUser.Email,
-				CreatedAt: dbUser.CreatedAt,
-				UpdatedAt: dbUser.UpdatedAt,
-			},
-		})
-	}
 }
