@@ -3,12 +3,21 @@ package main
 import (
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/faeb5/winecellar/internal/middleware"
+	"github.com/joho/godotenv"
 )
 
 func main() {
-	log.Println("Listening on port 8080")
+	if err := godotenv.Load(); err != nil {
+		log.Fatal(err)
+	}
+
+	port := os.Getenv("PORT")
+	if port == "" {
+		log.Fatal("PORT not set")
+	}
 
 	apiMux := http.NewServeMux()
 	apiMux.HandleFunc("GET /health", func(w http.ResponseWriter, r *http.Request) {
@@ -28,8 +37,9 @@ func main() {
 	defaultStack := middleware.CreateStack(middleware.Logging)
 
 	server := http.Server{
-		Addr:    ":8080",
+		Addr:    ":" + port,
 		Handler: defaultStack(mux),
 	}
+	log.Println("Listening on port", port)
 	log.Fatal(server.ListenAndServe())
 }
