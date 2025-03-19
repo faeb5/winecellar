@@ -15,6 +15,7 @@ import (
 )
 
 type apiConfig struct {
+	profile   string
 	port      string
 	jwtSecret string
 	dbQueries *database.Queries
@@ -35,16 +36,19 @@ func main() {
 	apiMux.HandleFunc("GET /health", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(http.StatusText(http.StatusOK)))
 	})
-
 	apiStack := middleware.CreateStack(middleware.Authorized(apiConfig.jwtSecret))
+
+	// DEV routes
+	devMux := http.NewServeMux()
+	devMux.HandleFunc("POST /reset", handleReset(apiConfig))
+	devStack := middleware.CreateStack(middleware.DevOnly(apiConfig.profile))
 
 	// default routes
 	mux := http.NewServeMux()
 	mux.Handle("/api/", http.StripPrefix("/api", apiStack(apiMux)))
-
+	mux.Handle("/dev/", http.StripPrefix("/dev", devStack(devMux)))
 	mux.HandleFunc("POST /login", handleLogin(apiConfig))
 	mux.HandleFunc("POST /register", handleRegister(apiConfig))
-
 	defaultStack := middleware.CreateStack(middleware.Logging)
 
 	server := http.Server{
@@ -56,6 +60,10 @@ func main() {
 }
 
 func createApiConfig() (apiConfig, error) {
+	profile := os.Getenv("PROFILE")
+	if profile == "" {
+		return apiConfig{}, errors.New("PROFILE is not set")
+	}
 	port := os.Getenv("PORT")
 	if port == "" {
 		return apiConfig{}, errors.New("PORT is not set")
@@ -77,6 +85,7 @@ func createApiConfig() (apiConfig, error) {
 	}
 
 	config := apiConfig{
+		profile:   profile,
 		port:      port,
 		jwtSecret: jwtSecret,
 		dbQueries: dbQueries,
