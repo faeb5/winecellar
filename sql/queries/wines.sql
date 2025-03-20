@@ -3,7 +3,7 @@ INSERT INTO wines (
     id,
     name,
     color,
-    wine_maker,
+    producer,
     country,
     vintage
 ) VALUES (?, ?, ?, ?, ?, ?)
