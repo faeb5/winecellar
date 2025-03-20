@@ -38,9 +38,10 @@ type Wine struct {
 	ID        string
 	Color     string
 	Name      string
-	WineMaker string
+	Producer  string
 	Country   string
 	Vintage   int64
+	CreatedBy string
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }

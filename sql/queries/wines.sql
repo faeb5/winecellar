@@ -5,9 +5,17 @@ INSERT INTO wines (
     color,
     producer,
     country,
-    vintage
-) VALUES (?, ?, ?, ?, ?, ?)
+    vintage,
+    created_by
+) VALUES (?, ?, ?, ?, ?, ?, ?)
 RETURNING *;
 
 -- name: DeleteAllWines :exec
 DELETE FROM wines;
+
+-- name: GetWineByProducerAndNameAndVintage :one
+SELECT *
+FROM wines
+WHERE producer = ?
+    AND name = ?
+    AND vintage = ?;

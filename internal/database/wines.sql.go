@@ -14,20 +14,22 @@ INSERT INTO wines (
     id,
     name,
     color,
-    wine_maker,
+    producer,
     country,
-    vintage
-) VALUES (?, ?, ?, ?, ?, ?)
-RETURNING id, color, name, wine_maker, country, vintage, created_at, updated_at
+    vintage,
+    created_by
+) VALUES (?, ?, ?, ?, ?, ?, ?)
+RETURNING id, color, name, producer, country, vintage, created_by, created_at, updated_at
 `
 
 type CreateWineParams struct {
 	ID        string
 	Name      string
 	Color     string
-	WineMaker string
+	Producer  string
 	Country   string
 	Vintage   int64
+	CreatedBy string
 }
 
 func (q *Queries) CreateWine(ctx context.Context, arg CreateWineParams) (Wine, error) {
@@ -35,18 +37,20 @@ func (q *Queries) CreateWine(ctx context.Context, arg CreateWineParams) (Wine, e
 		arg.ID,
 		arg.Name,
 		arg.Color,
-		arg.WineMaker,
+		arg.Producer,
 		arg.Country,
 		arg.Vintage,
+		arg.CreatedBy,
 	)
 	var i Wine
 	err := row.Scan(
 		&i.ID,
 		&i.Color,
 		&i.Name,
-		&i.WineMaker,
+		&i.Producer,
 		&i.Country,
 		&i.Vintage,
+		&i.CreatedBy,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -60,4 +64,35 @@ DELETE FROM wines
 func (q *Queries) DeleteAllWines(ctx context.Context) error {
 	_, err := q.db.ExecContext(ctx, deleteAllWines)
 	return err
+}
+
+const getWineByProducerAndNameAndVintage = `-- name: GetWineByProducerAndNameAndVintage :one
+SELECT id, color, name, producer, country, vintage, created_by, created_at, updated_at
+FROM wines
+WHERE producer = ?
+    AND name = ?
+    AND vintage = ?
+`
+
+type GetWineByProducerAndNameAndVintageParams struct {
+	Producer string
+	Name     string
+	Vintage  int64
+}
+
+func (q *Queries) GetWineByProducerAndNameAndVintage(ctx context.Context, arg GetWineByProducerAndNameAndVintageParams) (Wine, error) {
+	row := q.db.QueryRowContext(ctx, getWineByProducerAndNameAndVintage, arg.Producer, arg.Name, arg.Vintage)
+	var i Wine
+	err := row.Scan(
+		&i.ID,
+		&i.Color,
+		&i.Name,
+		&i.Producer,
+		&i.Country,
+		&i.Vintage,
+		&i.CreatedBy,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
 }

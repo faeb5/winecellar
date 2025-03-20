@@ -8,3 +8,14 @@ type user struct {
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 }
+
+type wine struct {
+	ID        string    `json:"id"`
+	Name      string    `json:"name"`
+	Color     string    `json:"color"`
+	Producer  string    `json:"producer"`
+	Country   string    `json:"country"`
+	Vintage   int       `json:"vintage"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+}

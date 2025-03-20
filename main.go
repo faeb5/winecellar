@@ -36,6 +36,7 @@ func main() {
 	apiMux.HandleFunc("GET /health", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(http.StatusText(http.StatusOK)))
 	})
+	apiMux.HandleFunc("POST /wines", handleCreateWine(apiConfig))
 	apiStack := middleware.CreateStack(middleware.Authorized(apiConfig.jwtSecret))
 
 	// DEV routes
