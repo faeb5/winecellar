@@ -38,6 +38,7 @@ func main() {
 	})
 	apiMux.HandleFunc("POST /wines", handleCreateWine(apiConfig))
 	apiMux.HandleFunc("DELETE /wines/{wineID}", handleDeleteWine(apiConfig))
+	apiMux.HandleFunc("GET /wines/{wineID}", handleGetWine(apiConfig))
 	apiStack := middleware.CreateStack(middleware.Authorized(apiConfig.jwtSecret))
 
 	// DEV routes
