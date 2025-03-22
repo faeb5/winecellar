@@ -24,6 +24,31 @@ type createWineResponse struct {
 	wine
 }
 
+func handleDeleteWine(apiConfig apiConfig) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		userID := r.Header.Get(userIdHeader)
+		if userID == "" {
+			respondWithError(w, http.StatusUnauthorized, http.StatusText(http.StatusUnauthorized),
+				fmt.Errorf("Missing header %s in http request", userIdHeader))
+			return
+		}
+
+		wineID := r.PathValue("wineID")
+		if _, err := apiConfig.dbQueries.GetWineByID(r.Context(), wineID); err != nil {
+			respondWithError(w, http.StatusNotFound, http.StatusText(http.StatusNotFound), err)
+			return
+		}
+
+		if err := apiConfig.dbQueries.DeleteWine(r.Context(), wineID); err != nil {
+			respondWithError(w, http.StatusInternalServerError,
+				http.StatusText(http.StatusInternalServerError), err)
+			return
+		}
+
+		w.WriteHeader(http.StatusOK)
+	}
+}
+
 func handleCreateWine(apiConfig apiConfig) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userID := r.Header.Get(userIdHeader)

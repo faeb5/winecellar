@@ -19,3 +19,11 @@ FROM wines
 WHERE producer = ?
     AND name = ?
     AND vintage = ?;
+
+-- name: DeleteWine :exec
+DELETE FROM wines WHERE id = ?;
+
+-- name: GetWineByID :one
+SELECT *
+FROM wines
+WHERE id = ?;

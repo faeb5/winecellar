@@ -66,6 +66,38 @@ func (q *Queries) DeleteAllWines(ctx context.Context) error {
 	return err
 }
 
+const deleteWine = `-- name: DeleteWine :exec
+DELETE FROM wines WHERE id = ?
+`
+
+func (q *Queries) DeleteWine(ctx context.Context, id string) error {
+	_, err := q.db.ExecContext(ctx, deleteWine, id)
+	return err
+}
+
+const getWineByID = `-- name: GetWineByID :one
+SELECT id, color, name, producer, country, vintage, created_by, created_at, updated_at
+FROM wines
+WHERE id = ?
+`
+
+func (q *Queries) GetWineByID(ctx context.Context, id string) (Wine, error) {
+	row := q.db.QueryRowContext(ctx, getWineByID, id)
+	var i Wine
+	err := row.Scan(
+		&i.ID,
+		&i.Color,
+		&i.Name,
+		&i.Producer,
+		&i.Country,
+		&i.Vintage,
+		&i.CreatedBy,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const getWineByProducerAndNameAndVintage = `-- name: GetWineByProducerAndNameAndVintage :one
 SELECT id, color, name, producer, country, vintage, created_by, created_at, updated_at
 FROM wines
