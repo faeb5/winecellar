@@ -128,3 +128,48 @@ func (q *Queries) GetWineByProducerAndNameAndVintage(ctx context.Context, arg Ge
 	)
 	return i, err
 }
+
+const updateWineByID = `-- name: UpdateWineByID :one
+UPDATE wines SET
+    color = ?,
+    name = ?,
+    producer = ?,
+    country = ?,
+    vintage = ?,
+    updated_at = CURRENT_TIMESTAMP
+WHERE id = ?
+RETURNING id, color, name, producer, country, vintage, created_by, created_at, updated_at
+`
+
+type UpdateWineByIDParams struct {
+	Color    string
+	Name     string
+	Producer string
+	Country  string
+	Vintage  int64
+	ID       string
+}
+
+func (q *Queries) UpdateWineByID(ctx context.Context, arg UpdateWineByIDParams) (Wine, error) {
+	row := q.db.QueryRowContext(ctx, updateWineByID,
+		arg.Color,
+		arg.Name,
+		arg.Producer,
+		arg.Country,
+		arg.Vintage,
+		arg.ID,
+	)
+	var i Wine
+	err := row.Scan(
+		&i.ID,
+		&i.Color,
+		&i.Name,
+		&i.Producer,
+		&i.Country,
+		&i.Vintage,
+		&i.CreatedBy,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}

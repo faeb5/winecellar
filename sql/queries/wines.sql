@@ -27,3 +27,14 @@ DELETE FROM wines WHERE id = ?;
 SELECT *
 FROM wines
 WHERE id = ?;
+
+-- name: UpdateWineByID :one
+UPDATE wines SET
+    color = ?,
+    name = ?,
+    producer = ?,
+    country = ?,
+    vintage = ?,
+    updated_at = CURRENT_TIMESTAMP
+WHERE id = ?
+RETURNING *;
