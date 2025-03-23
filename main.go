@@ -14,6 +14,8 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
+const userIdHeader = "X-User-ID"
+
 type apiConfig struct {
 	profile   string
 	port      string

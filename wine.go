@@ -10,8 +10,6 @@ import (
 	"github.com/google/uuid"
 )
 
-const userIdHeader = "X-User-ID"
-
 type createWineParameters struct {
 	Name     string `json:"name"`
 	Color    string `json:"color"`
