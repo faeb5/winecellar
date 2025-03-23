@@ -32,6 +32,40 @@ type createWineResponse struct {
 	wine
 }
 
+func handleGetWines(apiConfig apiConfig) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		userID := r.Header.Get(userIdHeader)
+		if userID == "" {
+			respondWithError(w, http.StatusUnauthorized, http.StatusText(http.StatusUnauthorized),
+				fmt.Errorf("Missing header %s in http request", userIdHeader))
+			return
+		}
+
+		dbWines, err := apiConfig.dbQueries.GetAllWines(r.Context())
+		if err != nil {
+			respondWithError(w, http.StatusInternalServerError,
+				http.StatusText(http.StatusInternalServerError), err)
+			return
+		}
+
+		wines := make([]wine, len(dbWines))
+		for i, dbWine := range dbWines {
+			wines[i] = wine{
+				ID:        dbWine.ID,
+				Name:      dbWine.Name,
+				Color:     dbWine.Color,
+				Producer:  dbWine.Producer,
+				Country:   dbWine.Country,
+				Vintage:   int(dbWine.Vintage),
+				CreatedAt: dbWine.CreatedAt,
+				UpdatedAt: dbWine.UpdatedAt,
+			}
+		}
+
+		respondWithJSON(w, http.StatusOK, wines)
+	}
+}
+
 func handleUpdateWine(apiConfig apiConfig) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userID := r.Header.Get(userIdHeader)

@@ -38,3 +38,7 @@ UPDATE wines SET
     updated_at = CURRENT_TIMESTAMP
 WHERE id = ?
 RETURNING *;
+
+-- name: GetAllWines :many
+SELECT *
+FROM wines;

@@ -75,6 +75,44 @@ func (q *Queries) DeleteWine(ctx context.Context, id string) error {
 	return err
 }
 
+const getAllWines = `-- name: GetAllWines :many
+SELECT id, color, name, producer, country, vintage, created_by, created_at, updated_at
+FROM wines
+`
+
+func (q *Queries) GetAllWines(ctx context.Context) ([]Wine, error) {
+	rows, err := q.db.QueryContext(ctx, getAllWines)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Wine
+	for rows.Next() {
+		var i Wine
+		if err := rows.Scan(
+			&i.ID,
+			&i.Color,
+			&i.Name,
+			&i.Producer,
+			&i.Country,
+			&i.Vintage,
+			&i.CreatedBy,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getWineByID = `-- name: GetWineByID :one
 SELECT id, color, name, producer, country, vintage, created_by, created_at, updated_at
 FROM wines
