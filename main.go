@@ -36,7 +36,10 @@ func main() {
 	// API routes
 	apiMux := http.NewServeMux()
 	apiMux.HandleFunc("GET /health", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte(http.StatusText(http.StatusOK)))
+		if _, err := w.Write([]byte(http.StatusText(http.StatusOK))); err != nil {
+			log.Println(err)
+			w.WriteHeader(http.StatusInternalServerError)
+		}
 	})
 
 	apiMux.HandleFunc("GET /wines", handleGetWines(apiConfig))
