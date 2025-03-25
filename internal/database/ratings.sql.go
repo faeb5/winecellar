@@ -53,3 +53,51 @@ func (q *Queries) DeleteAllRatings(ctx context.Context) error {
 	_, err := q.db.ExecContext(ctx, deleteAllRatings)
 	return err
 }
+
+const getRatingByID = `-- name: GetRatingByID :one
+SELECT id, wine_id, user_id, created_at, updated_at, rating
+FROM ratings
+WHERE ID = ?
+`
+
+func (q *Queries) GetRatingByID(ctx context.Context, id string) (Rating, error) {
+	row := q.db.QueryRowContext(ctx, getRatingByID, id)
+	var i Rating
+	err := row.Scan(
+		&i.ID,
+		&i.WineID,
+		&i.UserID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.Rating,
+	)
+	return i, err
+}
+
+const updateRatingByID = `-- name: UpdateRatingByID :one
+UPDATE ratings
+SET
+    rating = ?,
+    updated_at = CURRENT_TIMESTAMP
+WHERE ID = ?
+RETURNING id, wine_id, user_id, created_at, updated_at, rating
+`
+
+type UpdateRatingByIDParams struct {
+	Rating string
+	ID     string
+}
+
+func (q *Queries) UpdateRatingByID(ctx context.Context, arg UpdateRatingByIDParams) (Rating, error) {
+	row := q.db.QueryRowContext(ctx, updateRatingByID, arg.Rating, arg.ID)
+	var i Rating
+	err := row.Scan(
+		&i.ID,
+		&i.WineID,
+		&i.UserID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.Rating,
+	)
+	return i, err
+}
