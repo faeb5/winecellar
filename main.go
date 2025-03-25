@@ -38,16 +38,19 @@ func main() {
 	apiMux.HandleFunc("GET /health", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(http.StatusText(http.StatusOK)))
 	})
+
+	apiMux.HandleFunc("GET /wines", handleGetWines(apiConfig))
 	apiMux.HandleFunc("POST /wines", handleCreateWine(apiConfig))
-	apiMux.HandleFunc("DELETE /wines/{wineID}", handleDeleteWine(apiConfig))
 	apiMux.HandleFunc("GET /wines/{wineID}", handleGetWine(apiConfig))
 	apiMux.HandleFunc("PUT /wines/{wineID}", handleUpdateWine(apiConfig))
-	apiMux.HandleFunc("GET /wines", handleGetWines(apiConfig))
-	apiMux.HandleFunc("POST /ratings", handleCreateRating(apiConfig))
-	apiMux.HandleFunc("PUT /ratings/{ratingID}", handleUpdateRating(apiConfig))
+	apiMux.HandleFunc("DELETE /wines/{wineID}", handleDeleteWine(apiConfig))
+
 	apiMux.HandleFunc("GET /ratings", handleGetRatings(apiConfig))
-	apiMux.HandleFunc("DELETE /ratings/{ratingID}", handleDeleteRating(apiConfig))
+	apiMux.HandleFunc("POST /ratings", handleCreateRating(apiConfig))
 	apiMux.HandleFunc("GET /ratings/{ratingID}", handleGetRating(apiConfig))
+	apiMux.HandleFunc("PUT /ratings/{ratingID}", handleUpdateRating(apiConfig))
+	apiMux.HandleFunc("DELETE /ratings/{ratingID}", handleDeleteRating(apiConfig))
+
 	apiStack := middleware.CreateStack(middleware.Authorized(apiConfig.jwtSecret))
 
 	// DEV routes
