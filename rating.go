@@ -19,13 +19,24 @@ type updateRatingParameters struct {
 
 func handleDeleteRating(apiConfig apiConfig) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		ratingID := r.PathValue("ratingID")
-		if _, err := apiConfig.dbQueries.GetRatingByID(r.Context(), ratingID); err != nil {
+		dbUser, err := apiConfig.dbQueries.GetUserByID(r.Context(), r.Header.Get(userIdHeader))
+		if err != nil {
+			respondWithError(w, http.StatusUnauthorized, http.StatusText(http.StatusUnauthorized), err)
+			return
+		}
+
+		dbRating, err := apiConfig.dbQueries.GetRatingByID(r.Context(), r.PathValue("ratingID"))
+		if err != nil {
 			respondWithError(w, http.StatusNotFound, http.StatusText(http.StatusNotFound), err)
 			return
 		}
 
-		if err := apiConfig.dbQueries.DeleteRatingByID(r.Context(), ratingID); err != nil {
+		if dbRating.UserID != dbUser.ID {
+			respondWithError(w, http.StatusForbidden, http.StatusText(http.StatusForbidden), err)
+			return
+		}
+
+		if err := apiConfig.dbQueries.DeleteRatingByID(r.Context(), dbRating.ID); err != nil {
 			respondWithError(w, http.StatusInternalServerError,
 				http.StatusText(http.StatusInternalServerError), err)
 		}
@@ -60,9 +71,20 @@ func handleGetRatings(apiConfig apiConfig) http.HandlerFunc {
 
 func handleUpdateRating(apiConfig apiConfig) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		ratingID := r.PathValue("ratingID")
-		if _, err := apiConfig.dbQueries.GetRatingByID(r.Context(), ratingID); err != nil {
+		dbUser, err := apiConfig.dbQueries.GetUserByID(r.Context(), r.Header.Get(userIdHeader))
+		if err != nil {
+			respondWithError(w, http.StatusUnauthorized, http.StatusText(http.StatusUnauthorized), err)
+			return
+		}
+
+		dbRating, err := apiConfig.dbQueries.GetRatingByID(r.Context(), r.PathValue("ratingID"))
+		if err != nil {
 			respondWithError(w, http.StatusNotFound, http.StatusText(http.StatusNotFound), err)
+			return
+		}
+
+		if dbRating.UserID != dbUser.ID {
+			respondWithError(w, http.StatusForbidden, http.StatusText(http.StatusForbidden), err)
 			return
 		}
 
@@ -73,8 +95,8 @@ func handleUpdateRating(apiConfig apiConfig) http.HandlerFunc {
 			return
 		}
 
-		dbRating, err := apiConfig.dbQueries.UpdateRatingByID(r.Context(), database.UpdateRatingByIDParams{
-			ID:     ratingID,
+		newDBRating, err := apiConfig.dbQueries.UpdateRatingByID(r.Context(), database.UpdateRatingByIDParams{
+			ID:     dbRating.ID,
 			Rating: params.Rating,
 		})
 		if err != nil {
@@ -84,12 +106,12 @@ func handleUpdateRating(apiConfig apiConfig) http.HandlerFunc {
 		}
 
 		respondWithJSON(w, http.StatusOK, rating{
-			ID:        dbRating.ID,
-			WineID:    dbRating.WineID,
-			UserID:    dbRating.UserID,
-			Rating:    dbRating.Rating,
-			CreatedAt: dbRating.CreatedAt,
-			UpdatedAt: dbRating.UpdatedAt,
+			ID:        newDBRating.ID,
+			WineID:    newDBRating.WineID,
+			UserID:    newDBRating.UserID,
+			Rating:    newDBRating.Rating,
+			CreatedAt: newDBRating.CreatedAt,
+			UpdatedAt: newDBRating.UpdatedAt,
 		})
 	}
 }
