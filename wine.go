@@ -159,7 +159,7 @@ func handleDeleteWine(apiConfig apiConfig) http.HandlerFunc {
 			return
 		}
 
-		w.WriteHeader(http.StatusOK)
+		w.WriteHeader(http.StatusNoContent)
 	}
 }
 
