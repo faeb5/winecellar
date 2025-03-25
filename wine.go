@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"time"
 
@@ -28,13 +27,6 @@ type updateWineParameters struct {
 
 func handleGetWines(apiConfig apiConfig) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		userID := r.Header.Get(userIdHeader)
-		if userID == "" {
-			respondWithError(w, http.StatusUnauthorized, http.StatusText(http.StatusUnauthorized),
-				fmt.Errorf("Missing header %s in http request", userIdHeader))
-			return
-		}
-
 		dbWines, err := apiConfig.dbQueries.GetAllWines(r.Context())
 		if err != nil {
 			respondWithError(w, http.StatusInternalServerError,
@@ -62,13 +54,6 @@ func handleGetWines(apiConfig apiConfig) http.HandlerFunc {
 
 func handleUpdateWine(apiConfig apiConfig) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		userID := r.Header.Get(userIdHeader)
-		if userID == "" {
-			respondWithError(w, http.StatusUnauthorized, http.StatusText(http.StatusUnauthorized),
-				fmt.Errorf("Missing header %s in http request", userIdHeader))
-			return
-		}
-
 		wineID := r.PathValue("wineID")
 		if _, err := apiConfig.dbQueries.GetWineByID(r.Context(), wineID); err != nil {
 			respondWithError(w, http.StatusNotFound, http.StatusText(http.StatusNotFound), err)
@@ -111,13 +96,6 @@ func handleUpdateWine(apiConfig apiConfig) http.HandlerFunc {
 
 func handleGetWine(apiConfig apiConfig) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		userID := r.Header.Get(userIdHeader)
-		if userID == "" {
-			respondWithError(w, http.StatusUnauthorized, http.StatusText(http.StatusUnauthorized),
-				fmt.Errorf("Missing header %s in http request", userIdHeader))
-			return
-		}
-
 		wineID := r.PathValue("wineID")
 		dbWine, err := apiConfig.dbQueries.GetWineByID(r.Context(), wineID)
 		if err != nil {
@@ -140,13 +118,6 @@ func handleGetWine(apiConfig apiConfig) http.HandlerFunc {
 
 func handleDeleteWine(apiConfig apiConfig) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		userID := r.Header.Get(userIdHeader)
-		if userID == "" {
-			respondWithError(w, http.StatusUnauthorized, http.StatusText(http.StatusUnauthorized),
-				fmt.Errorf("Missing header %s in http request", userIdHeader))
-			return
-		}
-
 		wineID := r.PathValue("wineID")
 		if _, err := apiConfig.dbQueries.GetWineByID(r.Context(), wineID); err != nil {
 			respondWithError(w, http.StatusNotFound, http.StatusText(http.StatusNotFound), err)
@@ -165,19 +136,6 @@ func handleDeleteWine(apiConfig apiConfig) http.HandlerFunc {
 
 func handleCreateWine(apiConfig apiConfig) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		userID := r.Header.Get(userIdHeader)
-		if userID == "" {
-			respondWithError(w, http.StatusUnauthorized, http.StatusText(http.StatusUnauthorized),
-				fmt.Errorf("Missing header %s in http request", userIdHeader))
-			return
-		}
-
-		dbUser, err := apiConfig.dbQueries.GetUserByID(r.Context(), userID)
-		if err != nil {
-			respondWithError(w, http.StatusUnauthorized, http.StatusText(http.StatusUnauthorized), err)
-			return
-		}
-
 		decoder := json.NewDecoder(r.Body)
 		var params createWineParameters
 		if err := decoder.Decode(&params); err != nil {
@@ -185,7 +143,7 @@ func handleCreateWine(apiConfig apiConfig) http.HandlerFunc {
 			return
 		}
 
-		_, err = apiConfig.dbQueries.GetWineByProducerAndNameAndVintage(
+		_, err := apiConfig.dbQueries.GetWineByProducerAndNameAndVintage(
 			r.Context(),
 			database.GetWineByProducerAndNameAndVintageParams{
 				Producer: params.Producer,
@@ -206,7 +164,7 @@ func handleCreateWine(apiConfig apiConfig) http.HandlerFunc {
 			Producer:  params.Producer,
 			Country:   params.Country,
 			Vintage:   int64(params.Vintage),
-			CreatedBy: dbUser.ID,
+			CreatedBy: r.Header.Get(userIdHeader),
 		})
 		if err != nil {
 			respondWithError(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError),

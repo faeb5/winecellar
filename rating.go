@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	"github.com/faeb5/winecellar/internal/database"
@@ -20,13 +19,6 @@ type updateRatingParameters struct {
 
 func handleDeleteRating(apiConfig apiConfig) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		userID := r.Header.Get(userIdHeader)
-		if userID == "" {
-			respondWithError(w, http.StatusUnauthorized, http.StatusText(http.StatusUnauthorized),
-				fmt.Errorf("Missing header %s in http request", userIdHeader))
-			return
-		}
-
 		ratingID := r.PathValue("ratingID")
 		if _, err := apiConfig.dbQueries.GetRatingByID(r.Context(), ratingID); err != nil {
 			respondWithError(w, http.StatusNotFound, http.StatusText(http.StatusNotFound), err)
@@ -44,13 +36,6 @@ func handleDeleteRating(apiConfig apiConfig) http.HandlerFunc {
 
 func handleGetRatings(apiConfig apiConfig) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		userID := r.Header.Get(userIdHeader)
-		if userID == "" {
-			respondWithError(w, http.StatusUnauthorized, http.StatusText(http.StatusUnauthorized),
-				fmt.Errorf("Missing header %s in http request", userIdHeader))
-			return
-		}
-
 		dbRatings, err := apiConfig.dbQueries.GetAllRatings(r.Context())
 		if err != nil {
 			respondWithError(w, http.StatusInternalServerError,
@@ -75,13 +60,6 @@ func handleGetRatings(apiConfig apiConfig) http.HandlerFunc {
 
 func handleUpdateRating(apiConfig apiConfig) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		userID := r.Header.Get(userIdHeader)
-		if userID == "" {
-			respondWithError(w, http.StatusUnauthorized, http.StatusText(http.StatusUnauthorized),
-				fmt.Errorf("Missing header %s in http request", userIdHeader))
-			return
-		}
-
 		ratingID := r.PathValue("ratingID")
 		if _, err := apiConfig.dbQueries.GetRatingByID(r.Context(), ratingID); err != nil {
 			respondWithError(w, http.StatusNotFound, http.StatusText(http.StatusNotFound), err)
@@ -118,14 +96,7 @@ func handleUpdateRating(apiConfig apiConfig) http.HandlerFunc {
 
 func handleCreateRating(apiConfig apiConfig) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		userID := r.Header.Get(userIdHeader)
-		if userID == "" {
-			respondWithError(w, http.StatusUnauthorized, http.StatusText(http.StatusUnauthorized),
-				fmt.Errorf("Missing header %s in http request", userIdHeader))
-			return
-		}
-
-		dbUser, err := apiConfig.dbQueries.GetUserByID(r.Context(), userID)
+		dbUser, err := apiConfig.dbQueries.GetUserByID(r.Context(), r.Header.Get(userIdHeader))
 		if err != nil {
 			respondWithError(w, http.StatusBadRequest, http.StatusText(http.StatusBadRequest), err)
 			return
