@@ -54,6 +54,41 @@ func (q *Queries) DeleteAllRatings(ctx context.Context) error {
 	return err
 }
 
+const getAllRatings = `-- name: GetAllRatings :many
+SELECT id, wine_id, user_id, created_at, updated_at, rating
+FROM ratings
+`
+
+func (q *Queries) GetAllRatings(ctx context.Context) ([]Rating, error) {
+	rows, err := q.db.QueryContext(ctx, getAllRatings)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Rating
+	for rows.Next() {
+		var i Rating
+		if err := rows.Scan(
+			&i.ID,
+			&i.WineID,
+			&i.UserID,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.Rating,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getRatingByID = `-- name: GetRatingByID :one
 SELECT id, wine_id, user_id, created_at, updated_at, rating
 FROM ratings

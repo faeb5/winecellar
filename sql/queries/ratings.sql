@@ -22,3 +22,7 @@ SET
     updated_at = CURRENT_TIMESTAMP
 WHERE ID = ?
 RETURNING *;
+
+-- name: GetAllRatings :many
+SELECT *
+FROM ratings;

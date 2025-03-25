@@ -18,6 +18,37 @@ type updateRatingParameters struct {
 	Rating string `json:"rating"`
 }
 
+func handleGetRatings(apiConfig apiConfig) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		userID := r.Header.Get(userIdHeader)
+		if userID == "" {
+			respondWithError(w, http.StatusUnauthorized, http.StatusText(http.StatusUnauthorized),
+				fmt.Errorf("Missing header %s in http request", userIdHeader))
+			return
+		}
+
+		dbRatings, err := apiConfig.dbQueries.GetAllRatings(r.Context())
+		if err != nil {
+			respondWithError(w, http.StatusInternalServerError,
+				http.StatusText(http.StatusInternalServerError), err)
+		}
+
+		ratings := make([]rating, len(dbRatings))
+		for i, dbRating := range dbRatings {
+			ratings[i] = rating{
+				ID:        dbRating.ID,
+				WineID:    dbRating.WineID,
+				UserID:    dbRating.UserID,
+				Rating:    dbRating.Rating,
+				CreatedAt: dbRating.CreatedAt,
+				UpdatedAt: dbRating.UpdatedAt,
+			}
+		}
+
+		respondWithJSON(w, http.StatusOK, ratings)
+	}
+}
+
 func handleUpdateRating(apiConfig apiConfig) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userID := r.Header.Get(userIdHeader)

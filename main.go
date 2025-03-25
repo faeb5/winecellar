@@ -45,6 +45,7 @@ func main() {
 	apiMux.HandleFunc("GET /wines", handleGetWines(apiConfig))
 	apiMux.HandleFunc("POST /ratings", handleCreateRating(apiConfig))
 	apiMux.HandleFunc("PUT /ratings/{ratingID}", handleUpdateRating(apiConfig))
+	apiMux.HandleFunc("GET /ratings", handleGetRatings(apiConfig))
 	apiStack := middleware.CreateStack(middleware.Authorized(apiConfig.jwtSecret))
 
 	// DEV routes
