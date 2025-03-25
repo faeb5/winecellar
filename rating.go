@@ -17,6 +17,26 @@ type updateRatingParameters struct {
 	Rating string `json:"rating"`
 }
 
+func handleGetRating(apiConfig apiConfig) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		ratingID := r.PathValue("ratingID")
+		dbRating, err := apiConfig.dbQueries.GetRatingByID(r.Context(), ratingID)
+		if err != nil {
+			respondWithError(w, http.StatusNotFound, http.StatusText(http.StatusNotFound), err)
+			return
+		}
+
+		respondWithJSON(w, http.StatusOK, rating{
+			ID:        dbRating.ID,
+			WineID:    dbRating.WineID,
+			UserID:    dbRating.UserID,
+			Rating:    dbRating.Rating,
+			CreatedAt: dbRating.CreatedAt,
+			UpdatedAt: dbRating.UpdatedAt,
+		})
+	}
+}
+
 func handleDeleteRating(apiConfig apiConfig) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		dbUser, err := apiConfig.dbQueries.GetUserByID(r.Context(), r.Header.Get(userIdHeader))
