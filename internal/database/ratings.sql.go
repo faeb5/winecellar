@@ -54,6 +54,16 @@ func (q *Queries) DeleteAllRatings(ctx context.Context) error {
 	return err
 }
 
+const deleteRatingByID = `-- name: DeleteRatingByID :exec
+DELETE FROM ratings
+WHERE id = ?
+`
+
+func (q *Queries) DeleteRatingByID(ctx context.Context, id string) error {
+	_, err := q.db.ExecContext(ctx, deleteRatingByID, id)
+	return err
+}
+
 const getAllRatings = `-- name: GetAllRatings :many
 SELECT id, wine_id, user_id, created_at, updated_at, rating
 FROM ratings

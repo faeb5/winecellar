@@ -26,3 +26,7 @@ RETURNING *;
 -- name: GetAllRatings :many
 SELECT *
 FROM ratings;
+
+-- name: DeleteRatingByID :exec
+DELETE FROM ratings
+WHERE id = ?;
