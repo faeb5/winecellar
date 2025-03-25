@@ -26,10 +26,6 @@ type updateWineParameters struct {
 	Vintage  int    `json:"vintage"`
 }
 
-type createWineResponse struct {
-	wine
-}
-
 func handleGetWines(apiConfig apiConfig) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userID := r.Header.Get(userIdHeader)
