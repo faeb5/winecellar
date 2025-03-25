@@ -15,6 +15,7 @@ type Rating struct {
 	UserID    string
 	CreatedAt time.Time
 	UpdatedAt time.Time
+	Rating    string
 }
 
 type RefreshToken struct {

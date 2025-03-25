@@ -13,19 +13,26 @@ const createRating = `-- name: CreateRating :one
 INSERT INTO ratings (
     id,
     wine_id,
-    user_id
-) VALUES (?, ?, ?)
-RETURNING id, wine_id, user_id, created_at, updated_at
+    user_id,
+    rating
+) VALUES (?, ?, ?, ?)
+RETURNING id, wine_id, user_id, created_at, updated_at, rating
 `
 
 type CreateRatingParams struct {
 	ID     string
 	WineID string
 	UserID string
+	Rating string
 }
 
 func (q *Queries) CreateRating(ctx context.Context, arg CreateRatingParams) (Rating, error) {
-	row := q.db.QueryRowContext(ctx, createRating, arg.ID, arg.WineID, arg.UserID)
+	row := q.db.QueryRowContext(ctx, createRating,
+		arg.ID,
+		arg.WineID,
+		arg.UserID,
+		arg.Rating,
+	)
 	var i Rating
 	err := row.Scan(
 		&i.ID,
@@ -33,6 +40,7 @@ func (q *Queries) CreateRating(ctx context.Context, arg CreateRatingParams) (Rat
 		&i.UserID,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.Rating,
 	)
 	return i, err
 }

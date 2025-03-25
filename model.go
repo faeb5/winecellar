@@ -19,3 +19,12 @@ type wine struct {
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 }
+
+type rating struct {
+	ID        string    `json:"id"`
+	WineID    string    `json:"wine_id"`
+	UserID    string    `json:"user_id"`
+	Rating    string    `json:"rating"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+}

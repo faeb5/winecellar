@@ -2,8 +2,9 @@
 INSERT INTO ratings (
     id,
     wine_id,
-    user_id
-) VALUES (?, ?, ?)
+    user_id,
+    rating
+) VALUES (?, ?, ?, ?)
 RETURNING *;
 
 -- name: DeleteAllRatings :exec
