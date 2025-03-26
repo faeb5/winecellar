@@ -16,7 +16,7 @@ INSERT INTO ratings (
     user_id,
     rating
 ) VALUES (?, ?, ?, ?)
-RETURNING id, wine_id, user_id, created_at, updated_at, rating
+RETURNING id, wine_id, user_id, rating, created_at, updated_at
 `
 
 type CreateRatingParams struct {
@@ -38,9 +38,9 @@ func (q *Queries) CreateRating(ctx context.Context, arg CreateRatingParams) (Rat
 		&i.ID,
 		&i.WineID,
 		&i.UserID,
+		&i.Rating,
 		&i.CreatedAt,
 		&i.UpdatedAt,
-		&i.Rating,
 	)
 	return i, err
 }
@@ -65,7 +65,7 @@ func (q *Queries) DeleteRatingByID(ctx context.Context, id string) error {
 }
 
 const getAllRatings = `-- name: GetAllRatings :many
-SELECT id, wine_id, user_id, created_at, updated_at, rating
+SELECT id, wine_id, user_id, rating, created_at, updated_at
 FROM ratings
 `
 
@@ -82,9 +82,9 @@ func (q *Queries) GetAllRatings(ctx context.Context) ([]Rating, error) {
 			&i.ID,
 			&i.WineID,
 			&i.UserID,
+			&i.Rating,
 			&i.CreatedAt,
 			&i.UpdatedAt,
-			&i.Rating,
 		); err != nil {
 			return nil, err
 		}
@@ -100,7 +100,7 @@ func (q *Queries) GetAllRatings(ctx context.Context) ([]Rating, error) {
 }
 
 const getRatingByID = `-- name: GetRatingByID :one
-SELECT id, wine_id, user_id, created_at, updated_at, rating
+SELECT id, wine_id, user_id, rating, created_at, updated_at
 FROM ratings
 WHERE ID = ?
 `
@@ -112,9 +112,9 @@ func (q *Queries) GetRatingByID(ctx context.Context, id string) (Rating, error) 
 		&i.ID,
 		&i.WineID,
 		&i.UserID,
+		&i.Rating,
 		&i.CreatedAt,
 		&i.UpdatedAt,
-		&i.Rating,
 	)
 	return i, err
 }
@@ -125,7 +125,7 @@ SET
     rating = ?,
     updated_at = CURRENT_TIMESTAMP
 WHERE ID = ?
-RETURNING id, wine_id, user_id, created_at, updated_at, rating
+RETURNING id, wine_id, user_id, rating, created_at, updated_at
 `
 
 type UpdateRatingByIDParams struct {
@@ -140,9 +140,9 @@ func (q *Queries) UpdateRatingByID(ctx context.Context, arg UpdateRatingByIDPara
 		&i.ID,
 		&i.WineID,
 		&i.UserID,
+		&i.Rating,
 		&i.CreatedAt,
 		&i.UpdatedAt,
-		&i.Rating,
 	)
 	return i, err
 }

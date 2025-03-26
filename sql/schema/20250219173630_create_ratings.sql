@@ -4,6 +4,7 @@ CREATE TABLE ratings (
     id text NOT NULL PRIMARY KEY,
     wine_id text NOT NULL,
     user_id text NOT NULL,
+    rating TEXT NOT NULL,
     created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
     UNIQUE (wine_id, user_id),

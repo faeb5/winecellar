@@ -13,9 +13,9 @@ type Rating struct {
 	ID        string
 	WineID    string
 	UserID    string
+	Rating    string
 	CreatedAt time.Time
 	UpdatedAt time.Time
-	Rating    string
 }
 
 type RefreshToken struct {
