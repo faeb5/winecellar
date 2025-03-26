@@ -15,7 +15,7 @@ const (
 )
 
 type loginParameters struct {
-	Email    string `json:"email"`
+	Username string `json:"username"`
 	Password string `json:"password"`
 }
 type loginResponse struct {
@@ -33,7 +33,7 @@ func handleLogin(conf apiConfig) http.HandlerFunc {
 			return
 		}
 
-		dbUser, err := conf.dbQueries.GetUserByEmail(r.Context(), params.Email)
+		dbUser, err := conf.dbQueries.GetUserByUsername(r.Context(), params.Username)
 		if err != nil {
 			respondWithError(w, http.StatusUnauthorized, http.StatusText(http.StatusUnauthorized), err)
 			return
