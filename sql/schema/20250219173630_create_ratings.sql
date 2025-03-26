@@ -1,12 +1,12 @@
 -- +goose Up
 -- +goose StatementBegin
 CREATE TABLE ratings (
-    id text NOT NULL PRIMARY KEY,
-    wine_id text NOT NULL,
-    user_id text NOT NULL,
+    id TEXT NOT NULL PRIMARY KEY,
+    wine_id TEXT NOT NULL,
+    user_id TEXT NOT NULL,
     rating TEXT NOT NULL,
-    created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     UNIQUE (wine_id, user_id),
     FOREIGN KEY (wine_id) REFERENCES wines(id) ON DELETE CASCADE,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
