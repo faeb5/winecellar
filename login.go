@@ -71,6 +71,7 @@ func handleLogin(conf apiConfig) http.HandlerFunc {
 		respondWithJSON(w, http.StatusOK, loginResponse{
 			user: user{
 				ID:        dbUser.ID,
+				Username:  dbUser.Username,
 				Email:     dbUser.Email,
 				CreatedAt: dbUser.CreatedAt,
 				UpdatedAt: dbUser.UpdatedAt,

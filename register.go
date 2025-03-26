@@ -10,6 +10,7 @@ import (
 )
 
 type registerParameters struct {
+	Username string `json:"username"`
 	Email    string `json:"email"`
 	Password string `json:"password"`
 }
@@ -26,7 +27,14 @@ func handleRegister(conf apiConfig) http.HandlerFunc {
 			return
 		}
 
-		// No error means the user already exists
+		// No error means the e-mail address already exists
+		if _, err := conf.dbQueries.GetUserByUsername(r.Context(), params.Username); err == nil {
+			respondWithError(w, http.StatusBadRequest,
+				http.StatusText(http.StatusBadRequest), err)
+			return
+		}
+
+		// No error means the e-mail address already exists
 		if _, err := conf.dbQueries.GetUserByEmail(r.Context(), params.Email); err == nil {
 			respondWithError(w, http.StatusBadRequest,
 				http.StatusText(http.StatusBadRequest), err)
@@ -42,6 +50,7 @@ func handleRegister(conf apiConfig) http.HandlerFunc {
 
 		dbUser, err := conf.dbQueries.CreateUser(r.Context(), database.CreateUserParams{
 			ID:             uuid.NewString(),
+			Username:       params.Username,
 			Email:          params.Email,
 			HashedPassword: hashedPassword,
 		})
@@ -54,6 +63,7 @@ func handleRegister(conf apiConfig) http.HandlerFunc {
 		respondWithJSON(w, http.StatusOK, registerResponse{
 			user{
 				ID:        dbUser.ID,
+				Username:  dbUser.Username,
 				Email:     dbUser.Email,
 				CreatedAt: dbUser.CreatedAt,
 				UpdatedAt: dbUser.UpdatedAt,

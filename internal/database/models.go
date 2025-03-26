@@ -29,6 +29,7 @@ type RefreshToken struct {
 
 type User struct {
 	ID             string
+	Username       string
 	Email          string
 	HashedPassword string
 	CreatedAt      time.Time
