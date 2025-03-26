@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"errors"
+	"flag"
 	"log"
 	"net/http"
 	"os"
@@ -24,7 +25,10 @@ type apiConfig struct {
 }
 
 func main() {
-	if err := godotenv.Load(); err != nil {
+	envFile := flag.String("e", ".env", "The environment file")
+	flag.Parse()
+
+	if err := godotenv.Load(*envFile); err != nil {
 		log.Fatal(err)
 	}
 
