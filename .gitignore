@@ -34,7 +34,7 @@ go.work
 
 # End of https://www.toptal.com/developers/gitignore/api/direnv
 
-*.sqlite3
-*.sqlite3-*
+*.db
+*.db-*
 .env
 internal/database
